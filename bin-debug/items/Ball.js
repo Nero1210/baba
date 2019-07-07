@@ -44,12 +44,13 @@ var Ball = (function (_super) {
                 }, 1500);
             }
         }, _this);
-        // 小球坠落
-        _this.dropTimer.addEventListener(egret.TimerEvent.TIMER, _this.drop, _this);
-        _this.speedTimer.addEventListener(egret.TimerEvent.TIMER, function () { return _this.a += 20 / 60; }, _this);
         return _this;
+        // 小球坠落
+        // this.dropTimer.addEventListener(egret.TimerEvent.TIMER, this.drop, this)
+        // this.speedTimer.addEventListener(egret.TimerEvent.TIMER, () => this.a += 20 / 60, this)
     }
     Ball.prototype.init = function (e) {
+        this.removeEventListener(egret.Event.ENTER_FRAME, this.drop, this);
         this.a = 1;
         this.flag = true;
         this.ball = createBitmapByName("ball_png");
@@ -62,31 +63,61 @@ var Ball = (function (_super) {
         this.ball.addEventListener(egret.TouchEvent.TOUCH_BEGIN, this.onTouchBegin, this);
         this.ball.addEventListener(egret.TouchEvent.TOUCH_END, this.onTouchEnd, this);
     };
+    Ball.prototype.getBigger = function () {
+        if (this.ball.width > 250) {
+            log(this.ball.width);
+            // setTimeout(() => {
+            this.ball.width = 250;
+            this.removeEventListener(egret.Event.ENTER_FRAME, this.getBigger, this);
+            // }, 200)
+            return;
+        }
+        this.ball.width += 1;
+        this.ball.height += 1;
+        this.ball.x -= 0.5;
+    };
     Ball.prototype.onTouchBegin = function () {
-        this.sizeTimer.start();
+        // this.sizeTimer.start()
+        this.addEventListener(egret.Event.ENTER_FRAME, this.getBigger, this);
+        // egret.Tween.get(this.ball).to({
+        // 	width: 300,
+        // 	height: 300,
+        // 	x: this.stage.stageWidth / 2 - 125
+        // }, 3000)
+        // egret.Tween.get(this.ball).to({ width: 250 }, 2000).to({ height: 250 }, 2000).wait(200).call(() => {
+        // 	log(this.ball.width)
+        // })
     };
     Ball.prototype.onTouchEnd = function () {
         this.sizeTimer.stop();
-        this.dropTimer.start();
-        this.speedTimer.start();
+        var _a = this.ball, x = _a.x, y = _a.y, width = _a.width, height = _a.height;
+        // this.ballRec = new egret.Rectangle(x, y, width, height)
+        // this.ballRec = this.ball.getBounds()
+        // this.addChild(this.ballRec)
+        // this.ball.mask = this.ballRec
+        // this.dropTimer.start()
+        // this.speedTimer.start()
+        this.addEventListener(egret.Event.ENTER_FRAME, this.drop, this);
         this.ball.removeEventListener(egret.TouchEvent.TOUCH_BEGIN, this.onTouchBegin, this);
     };
     Ball.prototype.drop = function (e) {
         if (!this.hited) {
-            // this.ball.intersects(this.hitTest)
+            // this.ballRec.intersects(this.hitTest)
             var isHit = this.ball.hitTestPoint(this.ball.x + 25, 300);
             if (isHit)
                 log('碰到啦!');
             this.hited = true;
         }
         if (this.ball.y > this.stage.$stageHeight - 60 - this.ball.height) {
-            this.dropTimer.stop();
-            this.speedTimer.stop();
-            this.removeChild(this.ball);
+            // this.dropTimer.stop()
+            // this.speedTimer.stop()
+            // this.removeChild(this.ball)
             this.init(e);
             return;
         }
         this.ball.y = this.ball.y + this.a;
+        // this.ballRec.y = this.ball.y
+        this.a += 20 / 60;
     };
     return Ball;
 }(Items));
